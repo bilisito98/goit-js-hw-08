@@ -1,25 +1,57 @@
-// Add imports above this line
-import { galleryItems } from './gallery-items';
-// Change code below this line
+import { galleryItems } from "./gallery-items.js";
 
-import SimpleLightbox from 'simplelightbox';
-import 'simplelightbox/dist/simple-lightbox.min.css';
+const gallery = document.querySelector(".gallery");
 
-const galleryContainer = document.querySelector('div.gallery');
-const photosMarkup = createGalleryItem(galleryItems);
+function createGallery(items) {
+  return items
+    .map(
+      (item) => `
+     <li class="gallery__item">
+       <a class="gallery__link" href="${item.original}">
+         <img
+           class="gallery__image"
+           src="${item.preview}"
+           data-source="${item.original}"
+           alt="${item.description}"
+         />
+       </a>
+     </li>`
+    )
+    .join("");
+}
 
-function createGalleryItem(element) {
-    return element
-        .map(({ preview, original, description }) => {
-            return `
-            <a class="gallery__item" href="${original}">
-            <img class="gallery__image" src="${preview}" alt="${description}"/>
-            </a>`
-        })
-        .join('');
-};
+gallery.innerHTML = createGallery(galleryItems);
+const addGallery = createGallery(galleryItems);
 
-galleryContainer.insertAdjacentHTML('beforeend', photosMarkup);
+gallery.innerHTML = addGallery;
 
-const galleryHandler = new SimpleLightbox('.gallery a', { captionsData:'alt', captionDelay:250});
-galleryHandler.on('show.simplelightbox');
+gallery.addEventListener("click", clickOnImage);
+
+function clickOnImage(imageAction) {
+  action(imageAction);
+
+  if (imageAction.target.nodeName !== "IMG") {
+    return;
+  }
+
+  const instance = basicLightbox.create(
+    `<img src="${imageAction.target.dataset.source}" width="800" height="600">`
+  );
+  instance.show();
+
+  //    se agrega un eventlistener; que cuando se pulse la tecla ESCAPE se cierre la imagen que esta previamente en pantalla completa
+
+  window.addEventListener("keydown", handleEscapeKey);
+
+  function handleEscapeKey(imageAction) {
+    if (imageAction.code === "Escape") {
+      instance.close();
+      window.removeEventListener("keydown", handleEscapeKey);
+    }
+  }
+}
+
+function action(imageAction) {
+  imageAction.preventDefault();
+}
+console.log(galleryItems)
